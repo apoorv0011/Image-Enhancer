@@ -13,7 +13,8 @@ const App = () => {
       <Home />
 
       <div className="text-sm mt-6 text-gray-500">
-        Powered by AP Technovations
+        <p>© 2025 <a href="https://github.com/apoorv0011" target="_blank" rel="noopener noreferrer">Apoorv Pachori</a> All rights reserved.</p>
+
       </div>
     </div>
   );
