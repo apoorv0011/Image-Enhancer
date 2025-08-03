@@ -3,7 +3,7 @@ import axios from "axios";
 // --- Configuration: Point to YOUR Backend Server ---
 // In development, this is the URL where your backend server is running.
 // When you deploy your application, this URL will need to be updated to your live backend server's address.
-const BACKEND_BASE_URL = "http://localhost:5000";
+const BACKEND_BASE_URL = "https://image-enhancer-umfo.onrender.com";
 
 // This function sends the image file from your frontend to YOUR backend for enhancement.
 export const enhancedimageAPI = async (file) => {
