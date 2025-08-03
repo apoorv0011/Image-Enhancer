@@ -1,81 +1,48 @@
 import axios from "axios";
-const API_KEY = "wxtjam61532o2xaoa";
-const BASE_Url = "https://techhk.aoscdn.com";
 
+// --- Configuration: Point to YOUR Backend Server ---
+// In development, this is the URL where your backend server is running.
+// When you deploy your application, this URL will need to be updated to your live backend server's address.
+const BACKEND_BASE_URL = "http://localhost:5000";
+
+// This function sends the image file from your frontend to YOUR backend for enhancement.
 export const enhancedimageAPI = async (file) => {
   try {
-    const taskId = await uploadImage(file);
-    console.log("Image Uploaded Successfully,task ID:", taskId);
+    const formData = new FormData();
+    // The field name 'image_file' MUST match what your backend's Multer expects (in server.js).
+    formData.append("image_file", file);
 
-    //Pooling krna pdega-Mtlb hme set timeinterval vgera lgana pdega yani hme api ko tb tk call krna hai jb tk pura data aa n jaye
-    const enhancedImageData = await PoolForEnhancedImage(taskId);
-    console.log(
-      "Image Enhanced Successfully,Ehanced Image Data:",
-      enhancedImageData
+    // Make the API call to your own backend's proxy endpoint
+    const response = await axios.post(
+      `${BACKEND_BASE_URL}/api/enhance-image`, // This is your backend's endpoint!
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data", // Essential for sending file data
+        },
+      }
     );
-    return enhancedImageData;
+
+    // Your backend now handles the full enhancement process (calling external API, polling, etc.).
+    // It directly returns the final enhanced image data.
+    console.log("Frontend received final enhanced image data from backend:", response.data);
+    return response.data; // This 'data' object should contain the 'image' URL (e.g., response.data.image)
+
   } catch (error) {
-    console.log("Error ennhacing image:", error.message);
-  }
-};
+    // Handle errors received from your backend or network issues
+    console.error("Frontend Error: Failed to enhance image via backend.", error);
 
-const uploadImage = async (file) => {
-  const formData = new FormData();
-  formData.append("image_file", file);
-
-  const { data } = await axios.post(
-    `${BASE_Url}/api/tasks/visual/scale`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        "X-API-KEY": API_KEY,
-      },
+    // Customize the error message based on the backend's response, if available.
+    if (error.response && error.response.data && error.response.data.message) {
+        throw new Error(`Enhancement failed: ${error.response.data.message}`);
+    } else if (error.request) {
+        throw new Error("Network error: Could not connect to the backend server.");
+    } else {
+        throw new Error(`An unexpected error occurred: ${error.message}`);
     }
-  );
-
-  if (!data?.data?.task_id) {
-    throw new Error("Failed to upload Image, task ID not found");
   }
-  return data.data.task_id;
-  // console.log(data)
-  // return taskId
 };
 
-const fetchEnhancedImage = async (taskId) => {
-  const { data } = await axios.get(
-    `${BASE_Url}/api/tasks/visual/scale/${taskId}`,
-    {
-      headers: {
-        "X-API-KEY": API_KEY,
-      },
-    }
-  );
-
-  if (!data?.data) {
-    throw new Error("Failed to fetch enhanced image! Image not found.");
-  }
-
-  return data.data;
-  // "/api/tasks/visual/scale/{task_id}"
-  // return enhancedImageData
-};
-
-const PoolForEnhancedImage = async (taskId, retries = 0) => {
-  const result = await fetchEnhancedImage(taskId);
-
-  if (result.state === 4) {
-    console.log("Image is still being Processed ");
-
-    if (retries >= 20) {
-      throw new Error("Max tries reached. Please try again later!");
-    }
-
-    //wait for 2 seconds
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    return PoolForEnhancedImage(taskId, retries + 1);
-  }
-  console.log("Enhanced image URL", result);
-  return result;
-};
+// --- IMPORTANT: DELETE ALL OLD EXTERNAL API CALLING FUNCTIONS FROM THIS FILE ---
+// The functions named 'uploadImage', 'fetchEnhancedImage', and 'PoolForEnhancedImage'
+// should be completely removed from 'enhanceimageAPI.js' as they are now handled by 'backend/server.js'.

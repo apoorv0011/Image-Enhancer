@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# ... (other existing .gitignore entries, like node_modules for frontend) ...
+
+# Backend specific exclusions
+/backend/node_modules/
+/backend/.env
